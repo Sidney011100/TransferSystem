@@ -19,18 +19,27 @@ func main() {
 	h := gin.Default()
 	RegisterRoutes(h)
 
+	db.InitDatabase(os.Getenv("DATABASE_URL"))
+	defer db.CloseDatabase()
+
+	port := getPort()
+	if port == "" {
+		port = "8080"
+	}
+
+	if err := h.Run(); err != nil {
+		log.Fatalf("server run failed: %v", err)
+	}
+}
+
+func getPort() string {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	db.InitDatabase()
-	defer db.CloseDatabase()
-
 	log.Printf("Starting server on port %s", port)
-	if err := h.Run(); err != nil {
-		log.Fatalf("server run failed: %v", err)
-	}
+	return port
 }
 
 func RegisterRoutes(h *gin.Engine) {
