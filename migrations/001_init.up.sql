@@ -13,6 +13,6 @@ CREATE TABLE t_transaction (
      destination_after VARCHAR(255) NOT NULL,
      amount VARCHAR(255),
      success BOOLEAN DEFAULT FALSE,
-     CONSTRAINT fk_source_account FOREIGN KEY (source_account_id) REFERENCES account(account_id),
-     CONSTRAINT fk_destination_account FOREIGN KEY (destination_account_id) REFERENCES account(account_id)
+     CONSTRAINT fk_source_account FOREIGN KEY (source_account_id) REFERENCES t_account(account_id),
+     CONSTRAINT fk_destination_account FOREIGN KEY (destination_account_id) REFERENCES t_account(account_id)
 );
