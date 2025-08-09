@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	db "transferSystem/database"
 	"transferSystem/model"
 
@@ -14,9 +13,17 @@ import (
 )
 
 func CreateAccount(id int64, initBalance string) error {
-	_, err := strconv.ParseFloat(initBalance, 64)
+	if id <= 0 {
+		return errors.New("id must be a positive integer")
+	}
+
+	balance, err := decimal.NewFromString(initBalance)
 	if err != nil {
 		return fmt.Errorf(ConversionFailed, err)
+	}
+
+	if balance.IsNegative() {
+		return fmt.Errorf(ErrInitialBalanceNotPositive)
 	}
 
 	newAccount := model.NewAccount{
