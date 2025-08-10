@@ -13,11 +13,16 @@ import (
 )
 
 func GetAccount(id int64) (*model.Account, error) {
+	res, ok := getAccountFromCache(id)
+	if ok {
+		return res, nil
+	}
 	ctx := context.Background()
 	res, err := db.GetAccount(ctx, id)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return res, fmt.Errorf(ErrAccountNotFound, id)
 	}
+	updateCachedAccount(id, res)
 	return res, err
 }
 
@@ -45,7 +50,6 @@ func CreateAccount(req *model.NewAccount) error {
 		AccountId:      id,
 		InitialBalance: initBalance,
 	}
-
 	ctx := context.Background()
 	err = db.CreateAccount(ctx, &newAccount)
 	return err
@@ -73,5 +77,11 @@ func UpdateAccount(ctx context.Context, account *model.Account, fund decimal.Dec
 		return fmt.Errorf(ErrAccountHasInsufficientFunds, account.AccountId, account.Balance)
 	}
 	account.Balance = newBalance.String()
-	return db.UpdateAccount(ctx, account)
+	err = db.UpdateAccount(ctx, account)
+	if err != nil {
+		removeCachedAccount(account.AccountId)
+		return err
+	}
+	updateCachedAccount(account.AccountId, account)
+	return nil
 }
