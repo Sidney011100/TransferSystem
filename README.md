@@ -1,5 +1,5 @@
 # Internal Transfer System
-This is an internal transfers application, it aims to facilitate transactions between accounts. 
+This is an internal transfers application, it aims to facilitate transactions of the same currency between accounts. 
 It was built with Golang and runs on postgres. 
 
 # Prerequisites
