@@ -1,4 +1,4 @@
-package internal
+package test
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"testing"
 	db "transferSystem/database"
+	"transferSystem/internal"
 	"transferSystem/model"
 
 	"github.com/joho/godotenv"
@@ -76,7 +77,7 @@ func TestGetAccount(t *testing.T) {
 		{
 			acc:         &model.Account{AccountId: 357, Balance: "100.123"},
 			wantErr:     true,
-			expectedErr: fmt.Errorf(ErrAccountNotFound, 357),
+			expectedErr: fmt.Errorf(internal.ErrAccountNotFound, 357),
 		},
 		{
 			acc:         &model.Account{AccountId: 1002, Balance: "1000000.12378857812"},
@@ -85,7 +86,7 @@ func TestGetAccount(t *testing.T) {
 		},
 	}
 	for _, testcase := range inputBalanceToExpectedResult {
-		acc, err := GetAccount(testcase.acc.AccountId)
+		acc, err := internal.GetAccount(testcase.acc.AccountId)
 		if (err != nil) != testcase.wantErr {
 			t.Fatal(fmt.Errorf("TestGetAccount(%v) error = %v", testcase.acc, dealWithErrUnexpected(testcase.wantErr, err)))
 		}
@@ -137,14 +138,14 @@ func TestCreateAccount(t *testing.T) {
 
 	for _, testcase := range inputBalanceToExpectedResult {
 		newAcc := testcase.acc
-		err := CreateAccount(newAcc)
+		err := internal.CreateAccount(newAcc)
 		if (err != nil) != testcase.wantErr {
 			t.Fatal(fmt.Errorf("TestCreateAccount(%v) error = %v", newAcc, dealWithErrUnexpected(testcase.wantErr, err)))
 		}
 		if testcase.wantErr {
 			continue
 		}
-		acc, err := GetAccount(testcase.acc.AccountId)
+		acc, err := internal.GetAccount(testcase.acc.AccountId)
 		if acc != testcase.updatedAcc {
 			t.Fatal(fmt.Errorf("TestCreateAccount(%v) expected acc %v, got %v", testcase.acc, testcase.updatedAcc, acc))
 		}
@@ -184,11 +185,11 @@ func TestUpdateAccount(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		err = UpdateAccount(ctx, testcase.acc, fund)
+		err = internal.UpdateAccount(ctx, testcase.acc, fund)
 		if (err != nil) != testcase.wantErr {
 			t.Fatal(fmt.Errorf("TestUpdateAccount(%v) error = %v", testcase.acc, dealWithErrUnexpected(testcase.wantErr, err)))
 		}
-		acc, err := GetAccount(testcase.acc.AccountId)
+		acc, err := internal.GetAccount(testcase.acc.AccountId)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -211,14 +212,14 @@ func TestTransaction(t *testing.T) {
 			transaction:  &model.NewTransaction{SourceAccountId: 4001, DestinationAccountId: 4002, Amount: "200"},
 			resultSrcAcc: &model.Account{AccountId: 4001, Balance: "100.123"},
 			resultDstAcc: &model.Account{AccountId: 4002, Balance: "100.456"},
-			expectedErr:  fmt.Errorf(ErrAccountHasInsufficientFunds, 4001, "100.123"),
+			expectedErr:  fmt.Errorf(internal.ErrAccountHasInsufficientFunds, 4001, "100.123"),
 			wantErr:      true,
 		},
 		{
 			transaction:  &model.NewTransaction{SourceAccountId: 4001, DestinationAccountId: 4002, Amount: "200.1.2"},
 			resultSrcAcc: &model.Account{AccountId: 4001, Balance: "100.123"},
 			resultDstAcc: &model.Account{AccountId: 4002, Balance: "100.456"},
-			expectedErr:  fmt.Errorf(ErrInvalidAmount, "200.1.2"),
+			expectedErr:  fmt.Errorf(internal.ErrInvalidAmount, "200.1.2"),
 			wantErr:      true,
 		},
 		{
@@ -238,7 +239,7 @@ func TestTransaction(t *testing.T) {
 	}
 
 	for _, testcase := range inputBalanceToExpectedResult {
-		sourceAcc, err := ProcessTransaction(ctx, testcase.transaction)
+		sourceAcc, err := internal.ProcessTransaction(ctx, testcase.transaction)
 		if (err != nil) != testcase.wantErr {
 			t.Errorf("TestProcessTransaction(%v) error = %v", testcase.transaction, dealWithErrUnexpected(testcase.wantErr, err))
 		}
@@ -255,7 +256,7 @@ func TestTransaction(t *testing.T) {
 		if sourceAcc.Balance != testcase.resultSrcAcc.Balance {
 			t.Errorf("source account balance not expected")
 		}
-		acc, err := GetAccount(testcase.resultDstAcc.AccountId)
+		acc, err := internal.GetAccount(testcase.resultDstAcc.AccountId)
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -3,11 +3,23 @@ This is an internal transfers application, it aims to facilitate transactions be
 It was built with Golang and runs on postgres. 
 
 # Prerequisites
-1. Docker Desktop
-2. Go (version `go1.23.5 darwin/amd64`)
+1. Install and run Docker Desktop
+2. Go (version `go1.23.5 or newer`)
+3. [`golang-migrate/tool`](https://github.com/golang-migrate/migrate)
 
 # Setting up
-### 1. Create Database
+### 1. Clone Repo
+```bash
+git clone https://github.com/Sidney011100/TransferSystem.git
+```
+2. cd into repo `cd TransferSystem`
+3. Get dependencies 
+```bash
+go mod tidy
+```
+
+
+### 2. Create Database
 1. `make reset-db`
 Expected Outcome 
 ```bash
@@ -24,17 +36,10 @@ Expected Outcome
     2/u create_account (26.047674ms)
 ```
 
-### 2. Run Application:
-1. Clone repo 
+### 3. Run Application:
+run application 
 ```bash
-git clone git@github.com:Sidney011100/TransferSystem.git
-```
-
-2. cd into repo `cd transferSystem` 
-3. get dependenceis and build application 
-```bash
-go mod tidy 
-go build transferSystem
+go run main.go
 ```
 
 
@@ -43,7 +48,7 @@ go build transferSystem
 Description: This API creates an account bases on the account id and initial balance.
 
 Assumptions: 
-1. account_id will not be negative, and cannot be more than int64 9223372036854775807
+1. account_id is more than 0, and cannot be more than 9223372036854775807.
 2. An account cannot be opened with a negative initial balance.
 3. A user cannot open an account with an account_id previously used.
 4. If it is successful, returning null is acceptable. Otherwise, an error will be encapsulated and sent.
@@ -111,7 +116,9 @@ Example of unsuccessful result
 
 ## Testing
 ### Running test
-Test cases were only written in 
+Test cases were written in `/test/internal_test.go`
+
+To run the testcase
 `go test transferSystem/internal`
 
 Expected Result

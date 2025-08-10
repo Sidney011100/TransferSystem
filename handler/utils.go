@@ -25,5 +25,9 @@ func doResp(c *gin.Context, data interface{}, err error) {
 		c.JSON(httpRespCode, respObj)
 		return
 	}
+	if data == nil {
+		c.Status(httpRespCode)
+		return
+	}
 	c.JSON(httpRespCode, data)
 }

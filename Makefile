@@ -19,7 +19,7 @@ start-db:
 		-p $(DB_PORT):5432 -d $(POSTGRES_IMAGE)
 
 stop-db:
-	docker stop $(CONTAINER_NAME)
+	docker stop $(CONTAINER_NAME) || true
 
 wait-db:
 	@echo "Waiting for Postgres to start..."
