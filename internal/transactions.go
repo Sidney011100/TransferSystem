@@ -17,8 +17,8 @@ func ProcessTransaction(ctx context.Context, req *model.NewTransaction) (*model.
 	}
 
 	amount, err := decimal.NewFromString(inputAmount)
-	if err != nil {
-		return nil, fmt.Errorf(ErrInvalidTransferAmount, inputAmount, err)
+	if err != nil || amount.LessThanOrEqual(decimal.Zero) {
+		return nil, fmt.Errorf(ErrInvalidTransferAmount, inputAmount)
 	}
 
 	sourceAccountId := req.SourceAccountId

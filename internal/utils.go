@@ -7,7 +7,7 @@ import (
 
 const (
 	ErrInvalidAmount         = "invalid amount/balance %s"
-	ErrInvalidTransferAmount = "invalid transfer amount %s, err %s"
+	ErrInvalidTransferAmount = "invalid transfer amount %s"
 )
 
 var cacheAccountLRU = make(map[int64]*model.Account)
