@@ -36,7 +36,7 @@ Expected Outcome
     2/u create_account (26.047674ms)
 ```
 
-### 3. Run Application:
+### 3. Run Application
 run application 
 ```bash
 go run main.go
@@ -45,7 +45,7 @@ go run main.go
 
 ## Features
 ### 1. Create Accounts `[POST] api/v1/accounts`
-Description: This API creates an account bases on the account id and initial balance.
+Description: Creates an account based on the account id and initial balance.
 
 Assumptions: 
 1. account_id is more than 0, and cannot be more than 9223372036854775807.
@@ -69,7 +69,7 @@ Example of error response
 ```
 
 ### 2. Get Accounts `[GET] api/v1/accounts/{account_id}`
-Description: This API returns an account previously set up, with an account_id. 
+Description: Returns an account previously set up, with an account_id. 
 
 Example of response
 ```json
@@ -81,10 +81,10 @@ Example of response
 
 
 ### 3. Make Transactions`[POST]  api/v1/transactions`
-Description: This API takes in transfers an `amount` from a `source_account_id` to a `destination_account_id`.
+Description: Transfers an `amount` from a `source_account_id` to a `destination_account_id`.
 
 Assumptions
-1. A source account and destination account has to exist.
+1. Both source account and destination account has to exist.
 2. An `amount` has to be more than 0 for a transaction to take place. 
 3. A transaction cannot be made if it leaves the source account with a negative balance. 
 4. A transaction is made from the source account, by the source user. A balance of the source account will be displayed for the user
@@ -118,8 +118,7 @@ Example of unsuccessful result
 ### Running test
 Test cases were written in `/test/internal_test.go`
 
-To run the testcase
-`go test transferSystem/internal`
+To run the testcase `-go test ./test/*`
 
 Expected Result
 ```bash
