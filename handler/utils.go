@@ -5,31 +5,25 @@ import (
 )
 
 const (
-	ErrInvalidAccount = "invalid internal id %s"
+	ErrInvalidAccount = "invalid account id %s"
 	ErrInvalidJson    = "invalid input %s"
-	ErrAccountTaken   = "internal ID %d already taken, please choose another"
+	ErrAccountTaken   = "account ID %d already taken, please choose another"
 
 	ErrTransactionFailed = "transaction failed %s"
 )
 
 type Response struct {
-	Status int         `json:"status"`
-	Msg    string      `json:"msg"`
-	Data   interface{} `json:"data"`
+	Msg string `json:"err"`
 }
 
 func doResp(c *gin.Context, data interface{}, err error) {
 	httpRespCode := 200
-	errCode := 0
-	errMsg := ""
 	if err != nil {
-		errCode = -1
-		errMsg = err.Error()
+		respObj := &Response{
+			Msg: err.Error(),
+		}
+		c.JSON(httpRespCode, respObj)
+		return
 	}
-	respObj := &Response{
-		Status: errCode,
-		Msg:    errMsg,
-		Data:   data,
-	}
-	c.JSON(httpRespCode, respObj)
+	c.JSON(httpRespCode, data)
 }

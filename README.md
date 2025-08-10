@@ -39,13 +39,14 @@ go build transferSystem
 
 
 ## Features
-### 1. `[POST] api/v1/accounts`
+### 1. Create Accounts `[POST] api/v1/accounts`
 Description: This API creates an account bases on the account id and initial balance.
 
 Assumptions: 
 1. account_id will not be negative, and cannot be more than int64 9223372036854775807
 2. An account cannot be opened with a negative initial balance.
 3. A user cannot open an account with an account_id previously used.
+4. If it is successful, returning null is acceptable. Otherwise, an error will be encapsulated and sent.
 
 Example of request
 ```json
@@ -55,32 +56,26 @@ Example of request
 }
 ```
 
-Example of response
+Example of error response
 ```json
 {
-    "status": 0,
-    "msg": "",
-    "data": null
+  "err": "account ID 2456 already taken, please choose another"
 }
 ```
 
-### 2. `[GET] api/v1/accounts/{account_id}`
+### 2. Get Accounts `[GET] api/v1/accounts/{account_id}`
 Description: This API returns an account previously set up, with an account_id. 
 
 Example of response
 ```json
 {
-    "status": 0,
-    "msg": "",
-    "data": {
-        "account_id": 124,
-        "balance": "100.23344"
-    }
+    "account_id": 124,
+    "balance": "100.23344"
 }
 ```
 
 
-### 3. `[POST]  api/v1/transactions`
+### 3. Make Transactions`[POST]  api/v1/transactions`
 Description: This API takes in transfers an `amount` from a `source_account_id` to a `destination_account_id`.
 
 Assumptions
@@ -98,27 +93,18 @@ Example of request
 }
 ```
 
-Example of successful result 
+Example of successful result, source account balance
 ```json
 {
-    "status": 0,
-    "msg": "",
-    "data": {
-        "account_id": 456,
-        "balance": "0.0757"
-    }
+  "account_id": 2456,
+  "balance": "99.32345"
 }
 ```
 
 Example of unsuccessful result
 ```json
 {
-    "status": -1,
-    "msg": "transaction failed internal 456 has insufficient funds, current balance 0.8757",
-    "data": {
-        "account_id": 456,
-        "balance": "0.8757"
-    }
+  "err": "transaction failed account 2456 has insufficient funds, current balance 99.32345"
 }
 ```
 

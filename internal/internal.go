@@ -54,7 +54,7 @@ func CreateAccount(req *model.NewAccount) error {
 func hasSufficientFunds(account *model.Account, fund decimal.Decimal) (string, bool) {
 	balance, err := decimal.NewFromString(account.Balance)
 	if err != nil {
-		log.Fatalf("get internal balance err: %v", err)
+		log.Fatalf("get account balance err: %v", err)
 		return account.Balance, false
 	}
 	if balance.Sub(fund).IsNegative() {

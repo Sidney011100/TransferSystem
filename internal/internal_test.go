@@ -193,7 +193,7 @@ func TestUpdateAccount(t *testing.T) {
 			t.Fatal(err)
 		}
 		if acc.Balance != testcase.updatedAcc.Balance {
-			t.Errorf("TestUpdateAccount(%v) error: internal balance expected %s, got %s", testcase.acc, testcase.updatedAcc.Balance, acc.Balance)
+			t.Errorf("TestUpdateAccount(%v) error: account balance expected %s, got %s", testcase.acc, testcase.updatedAcc.Balance, acc.Balance)
 		}
 	}
 }
@@ -250,17 +250,17 @@ func TestTransaction(t *testing.T) {
 			continue
 		}
 		if sourceAcc == nil {
-			t.Fatal(fmt.Errorf("TestProcessTransaction(%v) source internal returned nil unexpectedly", testcase.transaction))
+			t.Fatal(fmt.Errorf("TestProcessTransaction(%v) source account returned nil unexpectedly", testcase.transaction))
 		}
 		if sourceAcc.Balance != testcase.resultSrcAcc.Balance {
-			t.Errorf("source internal balance not expected")
+			t.Errorf("source account balance not expected")
 		}
 		acc, err := GetAccount(testcase.resultDstAcc.AccountId)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if acc.Balance != testcase.resultDstAcc.Balance {
-			t.Errorf("destination internal balance not expected")
+			t.Errorf("destination account balance not expected")
 		}
 	}
 }
