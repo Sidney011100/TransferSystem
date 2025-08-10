@@ -1,4 +1,4 @@
-package account
+package internal
 
 import (
 	"context"
@@ -10,15 +10,15 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func ProcessTransaction(ctx context.Context, req *model.NewTransaction) error {
+func ProcessTransaction(ctx context.Context, req *model.NewTransaction) (*model.Account, error) {
 	inputAmount := req.Amount
 	if !isStringValidNumber(inputAmount) {
-		return fmt.Errorf(ErrInvalidAmount, inputAmount)
+		return nil, fmt.Errorf(ErrInvalidAmount, inputAmount)
 	}
 
 	amount, err := decimal.NewFromString(inputAmount)
 	if err != nil {
-		return fmt.Errorf(ErrInvalidTransferAmount, inputAmount, err)
+		return nil, fmt.Errorf(ErrInvalidTransferAmount, inputAmount, err)
 	}
 
 	sourceAccountId := req.SourceAccountId
@@ -26,23 +26,24 @@ func ProcessTransaction(ctx context.Context, req *model.NewTransaction) error {
 
 	sourceAcc, err := GetAccount(sourceAccountId)
 	if err != nil {
-		return fmt.Errorf("source " + err.Error())
+		return nil, fmt.Errorf("source " + err.Error())
 	}
 
 	destinationAcc, err := GetAccount(destinationAccountId)
 	if err != nil {
-		return fmt.Errorf("destination " + err.Error())
+		return nil, fmt.Errorf("destination " + err.Error())
 	}
 
 	//create transaction in db
 	transId, err := db.CreateTransaction(ctx, sourceAcc, destinationAcc, amount)
 	if err != nil {
-		return fmt.Errorf(ErrFailedToCreateTransaction, err)
+		return sourceAcc, fmt.Errorf(ErrFailedToCreateTransaction, err)
 	}
 
 	// lock to ensure no one takes the funds if its sufficient.
-	if !hasSufficientFunds(sourceAcc, amount) {
-		return fmt.Errorf(ErrAccountHasInsufficientFunds, sourceAccountId)
+	currentSourceBalance, isSuffice := hasSufficientFunds(sourceAcc, amount)
+	if !isSuffice {
+		return sourceAcc, fmt.Errorf(ErrAccountHasInsufficientFunds, sourceAccountId, currentSourceBalance)
 	}
 
 	err = updateTransactionSrcAcc(ctx, transId, sourceAcc, amount)
@@ -51,7 +52,12 @@ func ProcessTransaction(ctx context.Context, req *model.NewTransaction) error {
 
 	err = updateTransactionDestAcc(ctx, transId, destinationAcc, amount)
 
-	return err
+	sourceAcc, err = GetAccount(sourceAccountId)
+	if err != nil {
+		return nil, fmt.Errorf("updated source " + err.Error())
+	}
+
+	return sourceAcc, err
 }
 
 func updateTransactionSrcAcc(ctx context.Context, id uuid.UUID, account *model.Account, amount decimal.Decimal) error {

@@ -1,8 +1,7 @@
-package account
+package internal
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -91,8 +90,9 @@ func TestGetAccount(t *testing.T) {
 			t.Fatal(fmt.Errorf("TestGetAccount(%v) error = %v", testcase.acc, dealWithErrUnexpected(testcase.wantErr, err)))
 		}
 		if testcase.wantErr {
-			if errors.Is(err, testcase.expectedErr) {
-				t.Fatal(fmt.Errorf("TestGetAccount(%v) error = %v", testcase.acc, dealWithErrUnexpected(testcase.wantErr, err)))
+			testCaseErr := dealWithExpectedErr(err, testcase.expectedErr)
+			if testCaseErr != nil {
+				t.Fatal(testCaseErr)
 			}
 			continue
 		}
@@ -193,7 +193,7 @@ func TestUpdateAccount(t *testing.T) {
 			t.Fatal(err)
 		}
 		if acc.Balance != testcase.updatedAcc.Balance {
-			t.Errorf("TestUpdateAccount(%v) error: account balance expected %s, got %s", testcase.acc, testcase.updatedAcc.Balance, acc.Balance)
+			t.Errorf("TestUpdateAccount(%v) error: internal balance expected %s, got %s", testcase.acc, testcase.updatedAcc.Balance, acc.Balance)
 		}
 	}
 }
@@ -211,7 +211,7 @@ func TestTransaction(t *testing.T) {
 			transaction:  &model.NewTransaction{SourceAccountId: 4001, DestinationAccountId: 4002, Amount: "200"},
 			resultSrcAcc: &model.Account{AccountId: 4001, Balance: "100.123"},
 			resultDstAcc: &model.Account{AccountId: 4002, Balance: "100.456"},
-			expectedErr:  fmt.Errorf(ErrAccountHasInsufficientFunds, 234),
+			expectedErr:  fmt.Errorf(ErrAccountHasInsufficientFunds, 4001, "100.123"),
 			wantErr:      true,
 		},
 		{
@@ -238,23 +238,29 @@ func TestTransaction(t *testing.T) {
 	}
 
 	for _, testcase := range inputBalanceToExpectedResult {
-		err := ProcessTransaction(ctx, testcase.transaction)
+		sourceAcc, err := ProcessTransaction(ctx, testcase.transaction)
 		if (err != nil) != testcase.wantErr {
 			t.Errorf("TestProcessTransaction(%v) error = %v", testcase.transaction, dealWithErrUnexpected(testcase.wantErr, err))
 		}
-		acc, err := GetAccount(testcase.resultSrcAcc.AccountId)
-		if err != nil {
-			t.Fatal(err)
+		if testcase.wantErr {
+			testCaseErr := dealWithExpectedErr(err, testcase.expectedErr)
+			if testCaseErr != nil {
+				t.Errorf("TestProcessTransaction(%v) unexpected error = %v", testcase.transaction, testCaseErr)
+			}
+			continue
 		}
-		if acc.Balance != testcase.resultSrcAcc.Balance {
-			t.Errorf("source account balance not expected")
+		if sourceAcc == nil {
+			t.Fatal(fmt.Errorf("TestProcessTransaction(%v) source internal returned nil unexpectedly", testcase.transaction))
 		}
-		acc, err = GetAccount(testcase.resultDstAcc.AccountId)
+		if sourceAcc.Balance != testcase.resultSrcAcc.Balance {
+			t.Errorf("source internal balance not expected")
+		}
+		acc, err := GetAccount(testcase.resultDstAcc.AccountId)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if acc.Balance != testcase.resultDstAcc.Balance {
-			t.Errorf("destination account balance not expected")
+			t.Errorf("destination internal balance not expected")
 		}
 	}
 }
@@ -264,4 +270,11 @@ func dealWithErrUnexpected(wantErr bool, err error) error {
 		return fmt.Errorf("expected error did not get")
 	}
 	return fmt.Errorf("not expecting error but got %s", err.Error())
+}
+
+func dealWithExpectedErr(err, expected error) error {
+	if expected.Error() != err.Error() {
+		return fmt.Errorf("expected error \"%s\" but got \"%s\"", expected.Error(), err.Error())
+	}
+	return nil
 }

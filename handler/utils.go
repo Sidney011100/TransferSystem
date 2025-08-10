@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	ErrInvalidAccount = "invalid account id %s"
+	ErrInvalidAccount = "invalid internal id %s"
 	ErrInvalidJson    = "invalid input %s"
-	ErrAccountTaken   = "account ID %d already taken, please choose another"
+	ErrAccountTaken   = "internal ID %d already taken, please choose another"
 
 	ErrTransactionFailed = "transaction failed %s"
 )

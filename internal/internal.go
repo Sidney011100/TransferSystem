@@ -1,4 +1,4 @@
-package account
+package internal
 
 import (
 	"context"
@@ -51,16 +51,16 @@ func CreateAccount(req *model.NewAccount) error {
 	return err
 }
 
-func hasSufficientFunds(account *model.Account, fund decimal.Decimal) bool {
+func hasSufficientFunds(account *model.Account, fund decimal.Decimal) (string, bool) {
 	balance, err := decimal.NewFromString(account.Balance)
 	if err != nil {
-		log.Fatalf("get account balance err: %v", err)
-		return false
+		log.Fatalf("get internal balance err: %v", err)
+		return account.Balance, false
 	}
 	if balance.Sub(fund).IsNegative() {
-		return false
+		return account.Balance, false
 	}
-	return true
+	return account.Balance, true
 }
 
 func UpdateAccount(ctx context.Context, account *model.Account, fund decimal.Decimal) error {
@@ -70,7 +70,7 @@ func UpdateAccount(ctx context.Context, account *model.Account, fund decimal.Dec
 	}
 	newBalance := balance.Add(fund)
 	if newBalance.IsNegative() {
-		return fmt.Errorf(ErrAccountHasInsufficientFunds, account.AccountId)
+		return fmt.Errorf(ErrAccountHasInsufficientFunds, account.AccountId, account.Balance)
 	}
 	account.Balance = newBalance.String()
 	return db.UpdateAccount(ctx, account)

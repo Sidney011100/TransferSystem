@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"transferSystem/account"
 	"transferSystem/database"
+	"transferSystem/internal"
 	"transferSystem/model"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ func UserCreateAccount(c *gin.Context) {
 		return
 	}
 
-	err := account.CreateAccount(req)
+	err := internal.CreateAccount(req)
 	if err != nil && strings.Contains(err.Error(), database.ErrDupKey) {
 		doResp(c, nil, fmt.Errorf(ErrAccountTaken, req.AccountId))
 		return
@@ -36,7 +36,7 @@ func UserGetAccount(c *gin.Context) {
 		doResp(c, nil, fmt.Errorf(ErrInvalidAccount, err))
 		return
 	}
-	res, err := account.GetAccount(i)
+	res, err := internal.GetAccount(i)
 	doResp(c, res, err)
 }
 
@@ -47,12 +47,12 @@ func UserTransaction(c *gin.Context) {
 		return
 	}
 
-	err := account.ProcessTransaction(context.Background(), req)
+	sourceAcc, err := internal.ProcessTransaction(context.Background(), req)
 	if err != nil {
-		doResp(c, nil, fmt.Errorf(ErrTransactionFailed, err))
+		doResp(c, sourceAcc, fmt.Errorf(ErrTransactionFailed, err))
 		return
 	}
 
-	doResp(c, nil, nil)
+	doResp(c, sourceAcc, nil)
 	return
 }
