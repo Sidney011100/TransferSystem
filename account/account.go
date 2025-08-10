@@ -12,7 +12,22 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func CreateAccount(id int64, initBalance string) error {
+func GetAccount(id int64) (*model.Account, error) {
+	ctx := context.Background()
+	res, err := db.GetAccount(ctx, id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return res, fmt.Errorf(ErrAccountNotFound, id)
+	}
+	return res, err
+}
+
+func CreateAccount(req *model.NewAccount) error {
+	initBalance := req.InitialBalance
+	if !isStringValidNumber(req.InitialBalance) {
+		return fmt.Errorf(ErrInvalidAmount, initBalance)
+	}
+
+	id := req.AccountId
 	if id <= 0 {
 		return errors.New("id must be a positive integer")
 	}
@@ -36,15 +51,6 @@ func CreateAccount(id int64, initBalance string) error {
 	return err
 }
 
-func GetAccount(id int64) (*model.Account, error) {
-	ctx := context.Background()
-	res, err := db.GetAccount(ctx, id)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return res, fmt.Errorf(ErrAccountNotFound, err)
-	}
-	return res, err
-}
-
 func hasSufficientFunds(account *model.Account, fund decimal.Decimal) bool {
 	balance, err := decimal.NewFromString(account.Balance)
 	if err != nil {
@@ -57,11 +63,15 @@ func hasSufficientFunds(account *model.Account, fund decimal.Decimal) bool {
 	return true
 }
 
-func updateAccount(ctx context.Context, account *model.Account, fund decimal.Decimal) error {
+func UpdateAccount(ctx context.Context, account *model.Account, fund decimal.Decimal) error {
 	balance, err := decimal.NewFromString(account.Balance)
 	if err != nil {
 		return fmt.Errorf(ConversionFailed, err)
 	}
-	account.Balance = balance.Add(fund).String()
+	newBalance := balance.Add(fund)
+	if newBalance.IsNegative() {
+		return fmt.Errorf(ErrAccountHasInsufficientFunds, account.AccountId)
+	}
+	account.Balance = newBalance.String()
 	return db.UpdateAccount(ctx, account)
 }

@@ -10,8 +10,20 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func ProcessTransaction(sourceAccountId, destinationAccountId int64, amount decimal.Decimal) error {
-	ctx := context.Background()
+func ProcessTransaction(ctx context.Context, req *model.NewTransaction) error {
+	inputAmount := req.Amount
+	if !isStringValidNumber(inputAmount) {
+		return fmt.Errorf(ErrInvalidAmount, inputAmount)
+	}
+
+	amount, err := decimal.NewFromString(inputAmount)
+	if err != nil {
+		return fmt.Errorf(ErrInvalidTransferAmount, inputAmount, err)
+	}
+
+	sourceAccountId := req.SourceAccountId
+	destinationAccountId := req.DestinationAccountId
+
 	sourceAcc, err := GetAccount(sourceAccountId)
 	if err != nil {
 		return fmt.Errorf("source " + err.Error())
@@ -43,7 +55,7 @@ func ProcessTransaction(sourceAccountId, destinationAccountId int64, amount deci
 }
 
 func updateTransactionSrcAcc(ctx context.Context, id uuid.UUID, account *model.Account, amount decimal.Decimal) error {
-	err := updateAccount(ctx, account, amount.Neg())
+	err := UpdateAccount(ctx, account, amount.Neg())
 	if err != nil {
 		return err
 	}
@@ -56,7 +68,7 @@ func updateTransactionSrcAcc(ctx context.Context, id uuid.UUID, account *model.A
 }
 
 func updateTransactionDestAcc(ctx context.Context, id uuid.UUID, account *model.Account, amount decimal.Decimal) error {
-	err := updateAccount(ctx, account, amount)
+	err := UpdateAccount(ctx, account, amount)
 	if err != nil {
 		return err
 	}

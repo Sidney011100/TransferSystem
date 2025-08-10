@@ -1,3 +1,10 @@
-INSERT INTO t_account (account_id, balance) VALUES (123, '100.123');
-INSERT INTO t_account (account_id, balance) VALUES (456, '100.456');
-INSERT INTO t_account (account_id, balance) VALUES (369, '200.369');
+INSERT INTO t_account (account_id, balance) VALUES (1001, '100.123');
+INSERT INTO t_account (account_id, balance) VALUES (1002, '1000000.12378857812');
+INSERT INTO t_account (account_id, balance) VALUES (3001, '100.123');
+INSERT INTO t_account (account_id, balance) VALUES (3002, '100.456354');
+INSERT INTO t_account (account_id, balance) VALUES (3003, '200.36923');
+INSERT INTO t_account (account_id, balance) VALUES (234, '100.123');
+INSERT INTO t_account (account_id, balance) VALUES (345, '100.456');
+INSERT INTO t_account (account_id, balance) VALUES (4001, '100.123');
+INSERT INTO t_account (account_id, balance) VALUES (4002, '100.456');
+INSERT INTO t_account (account_id, balance) VALUES (4003, '200.369');

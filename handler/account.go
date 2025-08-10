@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -9,7 +10,6 @@ import (
 	"transferSystem/model"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shopspring/decimal"
 )
 
 func UserCreateAccount(c *gin.Context) {
@@ -19,12 +19,7 @@ func UserCreateAccount(c *gin.Context) {
 		return
 	}
 
-	initBalance := req.InitialBalance
-	if !isStringValidNumber(req.InitialBalance) {
-		doResp(c, nil, fmt.Errorf(ErrInvalidAmount, initBalance))
-	}
-
-	err := account.CreateAccount(req.AccountId, req.InitialBalance)
+	err := account.CreateAccount(req)
 	if err != nil && strings.Contains(err.Error(), database.ErrDupKey) {
 		doResp(c, nil, fmt.Errorf(ErrAccountTaken, req.AccountId))
 		return
@@ -52,19 +47,7 @@ func UserTransaction(c *gin.Context) {
 		return
 	}
 
-	inputAmount := req.Amount
-	if !isStringValidNumber(inputAmount) {
-		doResp(c, nil, fmt.Errorf(ErrInvalidAmount, inputAmount))
-		return
-	}
-
-	transferAmount, err := decimal.NewFromString(inputAmount)
-	if err != nil {
-		doResp(c, nil, fmt.Errorf(ErrInvalidTransferAmount, inputAmount, err))
-		return
-	}
-
-	err = account.ProcessTransaction(req.SourceAccountId, req.DestinationAccountId, transferAmount)
+	err := account.ProcessTransaction(context.Background(), req)
 	if err != nil {
 		doResp(c, nil, fmt.Errorf(ErrTransactionFailed, err))
 		return

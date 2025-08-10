@@ -1,17 +1,13 @@
 package handler
 
 import (
-	"regexp"
-
 	"github.com/gin-gonic/gin"
 )
 
 const (
-	ErrInvalidAmount         = "invalid amount/balance %s"
-	ErrInvalidAccount        = "invalid account id %s"
-	ErrInvalidJson           = "invalid input %s"
-	ErrInvalidTransferAmount = "invalid transfer amount %s, err %s"
-	ErrAccountTaken          = "account ID %d already taken, please choose another"
+	ErrInvalidAccount = "invalid account id %s"
+	ErrInvalidJson    = "invalid input %s"
+	ErrAccountTaken   = "account ID %d already taken, please choose another"
 
 	ErrTransactionFailed = "transaction failed %s"
 )
@@ -36,9 +32,4 @@ func doResp(c *gin.Context, data interface{}, err error) {
 		Data:   data,
 	}
 	c.JSON(httpRespCode, respObj)
-}
-
-func isStringValidNumber(s string) bool {
-	re := regexp.MustCompile(`^\d+(\.\d+)?$`)
-	return re.MatchString(s)
 }
