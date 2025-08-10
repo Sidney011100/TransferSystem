@@ -11,7 +11,16 @@
 3. Running the app!
 
 ### Creating the database
+1. make start-db
+2. make create-db
+3. make migrate
 
+### To run the application:
+
+
+
+## Others
+### Initial Manual Set Up 
 #### Installing Postgres
 1. download docker desktop
 2. run postgres container
@@ -33,5 +42,5 @@ We are using `golang-migrate/migrate` tool
 migrate -path ./migrations -database "postgres://postgres:password@localhost:5432/transfer_db?sslmode=disable" up
 ```
 
-## To run the application: 
+
 
