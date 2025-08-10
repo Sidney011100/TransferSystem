@@ -11,7 +11,8 @@
 3. Running the app!
 
 ### Creating the database
-1. make start-db
+1. make reset-db
+2. make start-db
 2. make create-db
 3. make migrate
 
